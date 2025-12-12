@@ -1,4 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn
+} from 'typeorm';
 
 @Entity('companies')
 class Company {
@@ -9,7 +14,13 @@ class Company {
   name: string;
 
   @Column({ type: 'varchar' })
-  address: string;
+  cnpj: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  address?: string;
+
+  @CreateDateColumn({ type: 'time with time zone', name: 'created_at' })
+  createdAt: Date;
 }
 
 export default Company;

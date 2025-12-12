@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: stockin
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  flask-api:
+    build: ./ml-service # pasta com Dockerfile do Flask
+    ports:
+      - '5000:5000'
+    environment:
+      - FLASK_ENV=development
+    volumes:
+      - ./ml-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  node-api:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_NAME=stockin
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_RESET=false
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - flask-api
+    command: npm run dev
+
+volumes:
+  postgres_data:

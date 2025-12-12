@@ -6,7 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import Product from './product.js';
+import Product from './product';
 
 @Entity('sales')
 class Sale {

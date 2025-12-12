@@ -1,3 +1,4 @@
-import { AppDataSource } from "./data-source.js";
+import { AppDataSource, AppDevDataSource } from './data-source';
 
-export const DataSource = AppDataSource;
+export const DataSource =
+  process.env.NODE_ENV === 'production' ? AppDataSource : AppDevDataSource;

@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import express from 'express';
+import cors from 'cors';
 import { DataSource } from './database/connection.js';
 import { modelRouter } from './routes/model.js';
 import { productRouter } from './routes/products.js';
@@ -8,6 +9,7 @@ import { categoryRouter } from './routes/categories.js';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.use('/model', modelRouter);

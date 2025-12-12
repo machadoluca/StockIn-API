@@ -1,9 +1,9 @@
 import type { RequestHandler } from 'express';
-import { Repository } from 'typeorm';
-import { DataSource } from '../database/connection.js';
-import Product from '../domain/entities/product.js';
+import { Like, Raw, Repository } from 'typeorm';
+import { DataSource } from '../database/connection';
+import Product from '../domain/entities/product';
 import z from 'zod';
-import Category from '../domain/entities/category.js';
+import Category from '../domain/entities/category';
 
 class ProductController {
   productRepository: Repository<Product>;
@@ -60,9 +60,10 @@ class ProductController {
   public getProduct: RequestHandler = async (request, response) => {
     const { productId } = request.params;
 
-    const product = await this.productRepository.findOne({
-      where: { id: productId! }
-    });
+    const product = await this.productRepository
+      .createQueryBuilder('p')
+      .where(`p.id::text ILIKE :search`, { search: `${productId}%` })
+      .getMany();
 
     if (!product) {
       return response.status(400).json({ message: 'product not found' });

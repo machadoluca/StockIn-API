@@ -6,7 +6,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import Category from './category.js';
+import Category from './category';
+import Company from './company';
 
 @Entity('products')
 class Product {
@@ -22,12 +23,18 @@ class Product {
   @Column({ type: 'float4' })
   price: number;
 
-  @ManyToOne(() => Category, category => category.products, { eager: true })
-  @JoinColumn({ name: 'category_id' })
-  category: Category;
-
   @CreateDateColumn({ type: 'time with time zone', name: 'created_at' })
   createdAt: Date;
+
+  @ManyToOne(() => Company, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
+
+  @ManyToOne(() => Category, category => category.products, {
+    eager: true
+  })
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
 }
 
 export default Product;

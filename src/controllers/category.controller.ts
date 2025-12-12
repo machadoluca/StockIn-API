@@ -1,14 +1,16 @@
-import type { RequestHandler } from 'express';
 import z from 'zod';
-import Category from '../domain/entities/category.js';
-import { Repository } from 'typeorm';
-import { DataSource } from '../database/connection.js';
+import type { Repository } from 'typeorm';
+import type { RequestHandler } from 'express';
+
+import Category from '../domain/entities/category';
+import { DataSource } from '../database/connection';
 
 class CategoryController {
-  categoryRepository: Repository<Category>;
+  private categoryRepository: Repository<Category>;
 
-  constructor() {
-    this.categoryRepository = DataSource.getRepository(Category);
+  constructor(categoryRepository?: Repository<Category>) {
+    this.categoryRepository =
+      categoryRepository ?? DataSource.getRepository(Category);
   }
 
   public create: RequestHandler = async (request, response) => {
@@ -16,21 +18,60 @@ class CategoryController {
       name: z.string()
     });
 
-    const { name }: z.infer<typeof categorySchema> = request.body;
+    try {
+      categorySchema.parse(request.body);
 
-    const createdCategory = await this.categoryRepository.save({
-      name
-    });
+      const { name }: z.infer<typeof categorySchema> = request.body;
 
-    response.status(200).json(createdCategory);
+      const createdCategory = await this.categoryRepository.save({
+        name
+      });
+
+      response.status(200).json(createdCategory);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return response.status(401).json(error.issues);
+      }
+    }
+  };
+
+  public getCategoriesByCompanyId: RequestHandler = async (
+    request,
+    response
+  ) => {
+    const { companyId } = request.params;
+
+    try {
+      if (!companyId) {
+        return response.status(401).json({ message: 'companyId not provided' });
+      }
+
+      const categories = await this.categoryRepository.find({
+        where: {
+          company: { id: companyId }
+        },
+        relations: ['company']
+      });
+
+      if (!categories)
+        return response.status(401).json({ message: 'categories not found' });
+
+      return response.status(200).json(categories);
+    } catch (error) {}
   };
 
   public getCategory: RequestHandler = async (request, response) => {
     const { categoryId } = request.params;
 
     try {
+      if (!categoryId) {
+        return response
+          .status(401)
+          .json({ message: 'categoryId not provided' });
+      }
+
       const category = await this.categoryRepository.findOneBy({
-        id: categoryId!
+        id: categoryId
       });
 
       if (!category)

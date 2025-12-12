@@ -1,5 +1,14 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import Product from './product.js';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn
+} from 'typeorm';
+
+import Product from './product';
+import Company from './company';
 
 @Entity('categories')
 class Category {
@@ -11,6 +20,10 @@ class Category {
 
   @OneToMany(() => Product, product => product.category)
   products: Product[];
+
+  @ManyToOne(() => Company)
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 }
 
 export default Category;
