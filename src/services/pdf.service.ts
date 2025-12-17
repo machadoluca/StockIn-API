@@ -21,7 +21,8 @@ class PDFService {
       try {
         const doc = new PDFDocument({
           size: 'A4',
-          margins: { top: 50, bottom: 50, left: 50, right: 50 }
+          margins: { top: 50, bottom: 50, left: 50, right: 50 },
+          bufferPages: true
         });
 
         const buffers: Buffer[] = [];
@@ -37,7 +38,7 @@ class PDFService {
         doc
           .fontSize(24)
           .fillColor('#2C3E50')
-          .text('Relatório de Análise de Forecast', { align: 'center' });
+          .text('Relatório de Análise de Previsão', { align: 'center' });
 
         doc.moveDown();
         doc
@@ -207,14 +208,14 @@ class PDFService {
         });
 
         // Footer em todas as páginas
-        const pages = doc.bufferedPageRange();
-        for (let i = 0; i < pages.count; i++) {
+        const range = doc.bufferedPageRange();
+        for (let i = range.start; i < range.start + range.count; i++) {
           doc.switchToPage(i);
           doc
             .fontSize(8)
             .fillColor('#95A5A6')
             .text(
-              `Página ${i + 1} de ${pages.count}`,
+              `Página ${i + 1} de ${range.count}`,
               50,
               doc.page.height - 50,
               { align: 'center' }

@@ -47,8 +47,11 @@ class ForecastController {
         WHERE c.id = $1
         AND s.status IN (
           'Shipped',
-          'Shipped - delivered to buyer',
-          'shipped - picked up'
+          'Shipping',
+          'Shipped - Picked Up',
+          'Shipped - Out for Delivery',
+          'Shipped - Delivered to Buyer',
+          'Pending - Waiting for Pick Up'
         )
         GROUP BY c.name, date(s.created_at)
         ORDER BY day;
@@ -70,7 +73,7 @@ class ForecastController {
         },
         body: JSON.stringify({
           trainning_data: formatData,
-          initial: '60 days',
+          initial: '45 days',
           period: '7 days',
           horizon_str: '7 days'
         })
@@ -104,7 +107,7 @@ class ForecastController {
         formattedForecasts
       );
 
-      return response.status(200).json(savedForecasts);
+      return response.status(200).json(formatData);
     } catch (error) {
       console.log(error);
       response.status(500).json({ message: error });
@@ -143,37 +146,35 @@ class ForecastController {
 
   public generateAnalysisReport: RequestHandler = async (request, response) => {
     const generateReportSchema = z.object({
-      forecast_run_id: z.string()
+      company_id: z.string(),
+      category_id: z.string()
     });
 
     try {
       generateReportSchema.parse(request.body);
 
       const {
-        forecast_run_id: forecastRunId
+        company_id: companyId,
+        category_id: categoryId
       }: z.infer<typeof generateReportSchema> = request.body;
 
-      // Buscar o forecast run com todas as relações
-      const forecastRun = await DataSource.getRepository(ForecastRun).findOne({
-        where: { id: forecastRunId },
-        relations: ['category', 'company', 'forecastData']
+      const company = await DataSource.getRepository(Company).findOneBy({
+        id: companyId
       });
 
-      if (!forecastRun) {
-        return response
-          .status(404)
-          .json({ message: 'Forecast run não encontrado' });
+      if (!company) {
+        return response.status(400).json({ message: 'company not found' });
       }
 
-      if (!forecastRun.forecastData || forecastRun.forecastData.length === 0) {
-        return response
-          .status(400)
-          .json({
-            message: 'Nenhuma previsão encontrada para este forecast run'
-          });
+      const category = await DataSource.getRepository(Category).findOneBy({
+        id: categoryId
+      });
+
+      if (!category) {
+        return response.status(400).json({ message: 'category not found' });
       }
 
-      // Buscar dados históricos para enriquecer a análise
+      // Buscar dados históricos anteriores a previsão
       const historicalData: { day: Date; total_quantity: string }[] =
         await DataSource.query(
           `
@@ -193,16 +194,46 @@ class ForecastController {
           ORDER BY day DESC
           LIMIT 30;
         `,
-          [forecastRun.category.id]
+          [categoryId]
         );
 
-      // Preparar dados para análise
+      if (historicalData.length === 0) {
+        return response.status(400).json({
+          message: 'Não há dados históricos suficientes para esta categoria'
+        });
+      }
+
+      // Formatar dados para o modelo
+      const formatData = historicalData.map(data => {
+        return {
+          ds: data.day.toISOString().split('T')[0]!,
+          y: data.total_quantity
+        };
+      });
+
+      const forecastRun = await DataSource.getRepository(ForecastRun).findOne({
+        where: {
+          category: { id: categoryId },
+          company: { id: companyId }
+        },
+        order: { createdAt: 'DESC' },
+        relations: ['forecastData']
+      });
+
+      if (!forecastRun) {
+        return response.status(400).json({
+          message:
+            'Não há previsões geradas para esta categoria. Por favor, gere uma previsão primeiro.'
+        });
+      }
+
+      // Preparar dados para análise OpenAI
       const analysisData = {
-        categoryName: forecastRun.category.name,
-        companyName: forecastRun.company?.name || 'N/A',
+        categoryName: category.name,
+        companyName: company.name,
         metrics: forecastRun.metrics,
         forecasts: forecastRun.forecastData.map(f => ({
-          date: f.date,
+          date: new Date(f.date),
           predicted: f.predicted,
           predictedLower: f.predictedLower,
           predictedUpper: f.predictedUpper
@@ -216,14 +247,14 @@ class ForecastController {
       // Gerar análise com OpenAI
       const analysis = await openaiService.analyzeForecast(analysisData);
 
-      // Gerar PDF
+      // Gerar PDF com análise
       const pdfBuffer = await pdfService.generateForecastAnalysisReport({
-        categoryName: forecastRun.category.name,
-        companyName: forecastRun.company?.name || 'N/A',
+        categoryName: category.name,
+        companyName: company.name,
         analysis,
-        metrics: forecastRun.metrics,
-        forecasts: forecastRun.forecastData.map(f => ({
-          date: f.date,
+        metrics: analysisData.metrics,
+        forecasts: analysisData.forecasts.map(f => ({
+          date: new Date(f.date),
           predicted: f.predicted,
           predictedLower: f.predictedLower,
           predictedUpper: f.predictedUpper
@@ -231,11 +262,14 @@ class ForecastController {
         createdAt: new Date()
       });
 
-      // Enviar PDF como resposta
+      // Retornar PDF
       response.setHeader('Content-Type', 'application/pdf');
       response.setHeader(
         'Content-Disposition',
-        `attachment; filename="analise-forecast-${forecastRunId}-${Date.now()}.pdf"`
+        `attachment; filename="analise-forecast-${category.name.replace(
+          /\s/g,
+          '-'
+        )}-${Date.now()}.pdf"`
       );
       return response.send(pdfBuffer);
     } catch (error) {

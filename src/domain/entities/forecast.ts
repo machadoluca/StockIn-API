@@ -12,7 +12,7 @@ class Forecast {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => ForecastRun)
+  @ManyToOne(() => ForecastRun, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'forecast_run_id' })
   run: ForecastRun;
 
