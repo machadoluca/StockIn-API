@@ -4,6 +4,8 @@ import CompanyController from '../controllers/company.controller';
 const companyRouter = Router();
 const companyController = new CompanyController();
 
+companyRouter.get('/:companyId/summary', companyController.getSummary);
+
 companyRouter.get('/:companyId/categories', companyController.getCategories);
 
 companyRouter.get('/:companyId/products', companyController.getProducts);

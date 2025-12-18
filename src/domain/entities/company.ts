@@ -13,7 +13,7 @@ class Company {
   @Column({ type: 'varchar' })
   name: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   cnpj: string;
 
   @Column({ type: 'varchar', nullable: true })

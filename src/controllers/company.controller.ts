@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import type { Repository } from 'typeorm';
+import { Between, In, type Repository } from 'typeorm';
 import z from 'zod';
 import Company from '../domain/entities/company';
 import { DataSource } from '../database/connection';
@@ -7,6 +7,9 @@ import Category from '../domain/entities/category';
 import Product from '../domain/entities/product';
 import { pagination } from '../utils/pagination';
 import ForecastRun from '../domain/entities/forecastRun';
+import Sale from '../domain/entities/sale';
+import { create } from 'domain';
+import { on } from 'events';
 
 class CompanyController {
   private companyRepository: Repository<Company>;
@@ -15,6 +18,111 @@ class CompanyController {
     this.companyRepository =
       companyRepository ?? DataSource.getRepository(Company);
   }
+
+  public getSummary: RequestHandler = async (request, response) => {
+    const { companyId } = request.params;
+
+    try {
+      const company = await this.companyRepository.findOneBy({ id: companyId });
+
+      if (!company) {
+        return response.status(400).json({ message: 'company not found' });
+      }
+
+      // Período atual: junho (01/06 a 30/06)
+      const currentEndDate = new Date('2022-06-30');
+      const currentStartDate = new Date('2022-06-01');
+
+      // Período anterior: maio (01/05 a 31/05)
+      const previousEndDate = new Date('2022-05-31');
+      const previousStartDate = new Date('2022-05-01');
+
+      const salesRepository = DataSource.getRepository(Sale);
+
+      const currentSalesResult = await salesRepository
+        .createQueryBuilder('sale')
+        .select('SUM(sale.amount)', 'total')
+        .where('sale.company_id = :companyId', { companyId })
+        .andWhere('sale.status IN (:...statuses)', {
+          statuses: [
+            'Shipped',
+            'Shipping',
+            'Shipped - Picked Up',
+            'Shipped - Out for Delivery',
+            'Shipped - Delivered to Buyer',
+            'Pending - Waiting for Pick Up'
+          ]
+        })
+        .andWhere('sale.created_at BETWEEN :start AND :end', {
+          start: currentStartDate,
+          end: currentEndDate
+        })
+        .getRawOne();
+
+      const previousSalesResult = await salesRepository
+        .createQueryBuilder('sale')
+        .select('SUM(sale.amount)', 'total')
+        .where('sale.company_id = :companyId', { companyId })
+        .andWhere('sale.status IN (:...statuses)', {
+          statuses: [
+            'Shipped',
+            'Shipping',
+            'Shipped - Picked Up',
+            'Shipped - Out for Delivery',
+            'Shipped - Delivered to Buyer',
+            'Pending - Waiting for Pick Up'
+          ]
+        })
+        .andWhere('sale.created_at BETWEEN :start AND :end', {
+          start: previousStartDate,
+          end: previousEndDate
+        })
+        .getRawOne();
+
+      const currentSales = Number(currentSalesResult?.total) || 0;
+      const previousSales = Number(previousSalesResult?.total) || 0;
+
+      // Última semana (últimos 7 dias do período atual)
+      const weekEndDate = new Date(currentEndDate);
+      const weekStartDate = new Date(currentEndDate);
+      weekStartDate.setDate(weekStartDate.getDate() - 6);
+
+      const weekSalesCount = await salesRepository
+        .createQueryBuilder('sale')
+        .where('sale.company_id = :companyId', { companyId })
+        .andWhere('sale.status IN (:...statuses)', {
+          statuses: [
+            'Shipped',
+            'Shipping',
+            'Shipped - Picked Up',
+            'Shipped - Out for Delivery',
+            'Shipped - Delivered to Buyer',
+            'Pending - Waiting for Pick Up'
+          ]
+        })
+        .andWhere('sale.created_at BETWEEN :start AND :end', {
+          start: weekStartDate,
+          end: weekEndDate
+        })
+        .getCount();
+
+      // Calcular a diferença percentual
+      const percentageChange =
+        previousSales === 0
+          ? 100
+          : ((currentSales - previousSales) / previousSales) * 100;
+
+      return response.status(200).json({
+        company,
+        currentSales: currentSales,
+        percentageChange: Math.round(percentageChange),
+        weekSalesCount
+      });
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({ message: 'internal server error' });
+    }
+  };
 
   public create: RequestHandler = async (request, response) => {
     const createCompSchema = z.object({

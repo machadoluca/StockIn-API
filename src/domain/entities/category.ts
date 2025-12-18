@@ -18,6 +18,12 @@ class Category {
   @Column({ type: 'varchar' })
   name: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  trendType: string;
+
+  @Column({ type: 'float4', nullable: true })
+  trendPercentage: string;
+
   @OneToMany(() => Product, product => product.category)
   products: Product[];
 

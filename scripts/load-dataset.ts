@@ -6,6 +6,7 @@ import Product from '../src/domain/entities/product.js';
 import { DataSource } from '../src/database/connection.js';
 import Sale from '../src/domain/entities/sale.js';
 import Category from '../src/domain/entities/category.js';
+import Company from '../src/domain/entities/company.js';
 
 async function loadDataset() {
   await DataSource.initialize();
@@ -14,6 +15,15 @@ async function loadDataset() {
   const productRepo = DataSource.getRepository(Product);
   const categoryRepo = DataSource.getRepository(Category);
   const saleRepo = DataSource.getRepository(Sale);
+  const companyRepo = DataSource.getRepository(Company);
+
+  const company = companyRepo.create({
+    id: 'f7ed78e1-7ba7-4b09-97d9-ab5b469dc5e5',
+    name: 'Amazon',
+    address: 'Seattle, WA'
+  });
+
+  await companyRepo.save(company);
 
   const filePath = path.join(
     fileURLToPath(import.meta.url),
@@ -43,9 +53,10 @@ async function loadDataset() {
       let product = productsCache.get(SKU);
 
       if (!product) {
+        const unitPrice = Number(Amount) / Number(Qty);
         product = await productRepo.save({
           sku: SKU,
-          price: Number(Amount),
+          price: unitPrice,
           category: category
         });
 
@@ -54,9 +65,11 @@ async function loadDataset() {
 
       const sale = saleRepo.create({
         quantity: Qty,
+        amount: Number(Amount),
         status: Status,
         createdAt: new Date(date),
-        product
+        product,
+        company
       });
 
       await saleRepo.save(sale);
