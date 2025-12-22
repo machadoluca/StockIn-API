@@ -1,6 +1,8 @@
 import type { RequestHandler } from 'express';
+import jwt from 'jsonwebtoken';
+import AppError from '../utils/error';
 
-export const authenticate: RequestHandler = (request, response, next) => {
+export const authMiddleware: RequestHandler = (request, response, next) => {
   const { authorization } = request.headers;
 
   if (!authorization) {
@@ -9,12 +11,15 @@ export const authenticate: RequestHandler = (request, response, next) => {
   }
   const [, token] = authorization.split(' ');
 
-  if (!process.env.SECRET_KEY) throw new Error('Erro interno');
+  if (!token) {
+    response.status(403).send({ message: 'usuário não autorizado' });
+    return;
+  }
 
   try {
-    const isValid = jwt.verify(token, process.env.SECRET_KEY);
+    const isValid = jwt.verify(token, process.env.SECRET_KEY!);
     if (isValid) next();
   } catch (error: any) {
-    throw new Error('Token expirado');
+    throw new AppError('Invalid token', 401);
   }
 };

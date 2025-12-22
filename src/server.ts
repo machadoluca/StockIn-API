@@ -1,13 +1,17 @@
 import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
-import { authRouter } from './routes/auth';
+
 import { DataSource } from './database/connection';
+
+import { authRouter } from './routes/auth';
 import { modelRouter } from './routes/model';
 import { productRouter } from './routes/products';
 import { companyRouter } from './routes/companies';
 import { categoryRouter } from './routes/categories';
-import { errorHandler } from './middlewares/error.middleware';
+
+import { errorMiddleware } from './middlewares/error.middleware';
+import { authMiddleware } from './middlewares/auth.middleware';
 
 const app = express();
 
@@ -17,12 +21,12 @@ app.use(express.json());
 // Routes
 app.use('/auth', authRouter);
 app.use('/model', modelRouter);
-app.use('/products', productRouter);
+app.use('/products', authMiddleware, productRouter);
 app.use('/categories', categoryRouter);
 app.use('/companies', companyRouter);
 
 // Error handling middleware
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 DataSource.initialize()
   .then(() => {
