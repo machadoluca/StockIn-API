@@ -2,7 +2,7 @@ import z from 'zod';
 import type { Repository } from 'typeorm';
 import type { RequestHandler } from 'express';
 
-import Category from '../domain/entities/category';
+import Category from '../entities/category';
 import { DataSource } from '../database/connection';
 
 class CategoryController {

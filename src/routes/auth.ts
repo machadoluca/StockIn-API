@@ -1,11 +1,9 @@
 import { Router } from 'express';
-import CategoryController from '../controllers/category.controller';
+import AuthController from '../controllers/auth.controller';
 
 const authRouter = Router();
-const authController = null;
+const authController = new AuthController();
 
-authRouter.post('/', (req, res) =>
-  res.json({ message: 'authentication route' })
-);
+authRouter.post('/', authController.authenticate);
 
-export { authRouter as categoryRouter };
+export { authRouter };

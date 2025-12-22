@@ -1,13 +1,13 @@
 import type { RequestHandler } from 'express';
 import { Between, In, type Repository } from 'typeorm';
 import z from 'zod';
-import Company from '../domain/entities/company';
+import Company from '../entities/company';
 import { DataSource } from '../database/connection';
-import Category from '../domain/entities/category';
-import Product from '../domain/entities/product';
+import Category from '../entities/category';
+import Product from '../entities/product';
 import { pagination } from '../utils/pagination';
-import ForecastRun from '../domain/entities/forecastRun';
-import Sale from '../domain/entities/sale';
+import ForecastRun from '../entities/forecastRun';
+import Sale from '../entities/sale';
 import { create } from 'domain';
 import { on } from 'events';
 

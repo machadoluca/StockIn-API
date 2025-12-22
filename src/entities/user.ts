@@ -22,6 +22,9 @@ class User {
   @Column({ type: 'varchar' })
   password: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  role: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

@@ -1,9 +1,9 @@
 import type { RequestHandler } from 'express';
 import { Like, Raw, Repository } from 'typeorm';
 import { DataSource } from '../database/connection';
-import Product from '../domain/entities/product';
+import Product from '../entities/product';
 import z from 'zod';
-import Category from '../domain/entities/category';
+import Category from '../entities/category';
 
 class ProductController {
   productRepository: Repository<Product>;
@@ -15,9 +15,9 @@ class ProductController {
   public getProducts: RequestHandler = async (request, response) => {
     const { company } = request.body;
 
-    const products = await this.productRepository.find();
+    const products = await this.productRepository.count();
 
-    return response.status(200).json({ products: products });
+    return response.status(200).json({ productsCount: products });
   };
 
   public create: RequestHandler = async (request, response) => {

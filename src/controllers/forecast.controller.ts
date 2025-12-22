@@ -1,10 +1,10 @@
 import z from 'zod';
 import { DataSource } from '../database/connection';
 import type { RequestHandler } from 'express';
-import Category from '../domain/entities/category';
-import ForecastRun from '../domain/entities/forecastRun';
-import Forecast from '../domain/entities/forecast';
-import Company from '../domain/entities/company';
+import Category from '../entities/category';
+import ForecastRun from '../entities/forecastRun';
+import Forecast from '../entities/forecast';
+import Company from '../entities/company';
 import openaiService from '../services/openai.service';
 import pdfService from '../services/pdf.service';
 
