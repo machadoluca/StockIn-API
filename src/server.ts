@@ -20,19 +20,20 @@ app.use(express.json());
 
 // Routes
 app.use('/auth', authRouter);
-app.use('/model', modelRouter);
 app.use('/products', authMiddleware, productRouter);
 app.use('/categories', categoryRouter);
 app.use('/companies', companyRouter);
+if (process.env.NODE_ENV !== 'development') {
+  app.use('/model', modelRouter);
+}
 
-// Error handling middleware
 app.use(errorMiddleware);
 
 DataSource.initialize()
   .then(() => {
     console.log('Database connected');
     app.listen(process.env.PORT, () =>
-      console.log(`HTTP server running on localhost:${process.env.PORT}`)
+      console.log(`HTTP server running on localhost:${process.env.PORT}`),
     );
   })
   .catch(err => console.log(err));
