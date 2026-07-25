@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
-import z from 'zod';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import z from 'zod';
 
-import { DataSource } from '../database/connection';
+import DataSource from '../database/connection';
 import User from '../entities/user';
 import AppError from '../utils/error';
 
@@ -11,7 +11,7 @@ class AuthController {
   public async login(request: Request, response: Response) {
     const authSchema = z.object({
       email: z.email(),
-      password: z.string(),
+      password: z.string()
     });
 
     const { email, password } = authSchema.parse(request.body);
@@ -22,26 +22,41 @@ class AuthController {
       throw new AppError('Invalid email or password', 401);
     }
 
-    // const comparePassword = await bcrypt.compare(password, user.password);
+    const checkPassword = await bcrypt.compare(password, user.password);
 
-    // if (!comparePassword) throw new AppError("Invalid email or password", 401);
+    if (!checkPassword) throw new AppError('Invalid email or password', 401);
 
-    const token = jwt.sign(
+    const refreshToken = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.REFRESH_KEY!,
+      { expiresIn: '1d' }
+    );
+
+    const accessToken = jwt.sign(
       { id: user.id, email: user.email },
       process.env.SECRET_KEY!,
-      { expiresIn: '1d' },
+      { expiresIn: '1h' }
     );
+
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000
+    });
 
     return response.status(200).json({
       message: 'Authentication successful',
-      token,
+      accessToken: accessToken,
       user: {
         name: user.name,
         email: user.email,
-        role: user.role,
-      },
+        role: user.role
+      }
     });
   }
+
+  public async refresh(request: Request, response: Response) {}
 }
 
 export default AuthController;
