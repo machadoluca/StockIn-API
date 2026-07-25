@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
 import { Like, Raw, Repository } from 'typeorm';
-import { DataSource } from '../database/connection';
+import DataSource from '../database/connection';
 import Product from '../entities/product';
 import z from 'zod';
 import Category from '../entities/category';

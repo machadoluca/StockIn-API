@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Product from '../src/entities/product.js';
-import { DataSource } from '../src/database/connection.js';
+import DataSourcefrom '../src/database/connection.js';
 import Sale from '../src/entities/sale.js';
 import Category from '../src/entities/category.js';
 import Company from '../src/entities/company.js';

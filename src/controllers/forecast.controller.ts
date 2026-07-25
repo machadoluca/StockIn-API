@@ -1,5 +1,5 @@
 import z from 'zod';
-import { DataSource } from '../database/connection';
+import DataSource from '../database/connection';
 import type { RequestHandler } from 'express';
 import Category from '../entities/category';
 import ForecastRun from '../entities/forecastRun';
@@ -103,9 +103,8 @@ class ForecastController {
         }
       );
 
-      const savedForecasts = await DataSource.getRepository(Forecast).save(
-        formattedForecasts
-      );
+      const savedForecasts =
+        await DataSource.getRepository(Forecast).save(formattedForecasts);
 
       return response.status(200).json(formatData);
     } catch (error) {
