@@ -1,14 +1,16 @@
 import type { Request, Response } from 'express';
+import type { Repository } from 'typeorm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import z from 'zod';
 
-import DataSource from '../database/connection';
 import User from '../entities/user';
 import AppError from '../utils/error';
 
 class AuthController {
-  public async login(request: Request, response: Response) {
+  constructor(private readonly userRepository: Repository<User>) {}
+
+  public login = async (request: Request, response: Response) => {
     const authSchema = z.object({
       email: z.email(),
       password: z.string()
@@ -16,15 +18,13 @@ class AuthController {
 
     const { email, password } = authSchema.parse(request.body);
 
-    const user = await DataSource.getRepository(User).findOneBy({ email });
+    const user = await this.userRepository.findOneBy({ email });
 
-    if (!user) {
-      throw new AppError('Invalid email or password', 401);
-    }
+    if (!user) throw new AppError('Email ou senha Inválidos', 401);
 
     const checkPassword = await bcrypt.compare(password, user.password);
 
-    if (!checkPassword) throw new AppError('Invalid email or password', 401);
+    if (!checkPassword) throw new AppError('Email ou senha Inválidos', 401);
 
     const refreshToken = jwt.sign(
       { id: user.id, email: user.email },
@@ -54,9 +54,9 @@ class AuthController {
         role: user.role
       }
     });
-  }
+  };
 
-  public async refresh(request: Request, response: Response) {}
+  public refresh = async (request: Request, response: Response) => {};
 }
 
 export default AuthController;
