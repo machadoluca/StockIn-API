@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { Repository } from 'typeorm';
 
 import z from 'zod';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import User from '../entities/user';
 

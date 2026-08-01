@@ -1,12 +1,13 @@
 {
   "name": "stockin-api",
-  "version": "1.0.0",
+  "version": "0.0.5",
   "description": "",
   "main": "index.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
+    "start": "node --env-file=.env.production dist/server.js",
     "dev": "tsx watch --env-file=.env.development src/server",
-    "build": "tsc",
+    "build": "node esbuild.mjs",
     "load-dataset": "tsx --env-file=.env.development scripts/load-dataset"
   },
   "keywords": [],
@@ -14,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.19.0",
-    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",
     "express": "^5.1.0",
@@ -33,6 +34,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.10.1",
     "@types/pdfkit": "^0.17.4",
+    "esbuild": "^0.28.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
