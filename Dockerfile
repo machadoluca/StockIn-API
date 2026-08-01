@@ -1,17 +1,21 @@
-# Node.js Dockerfile
-FROM node:20-alpine
+# Base Node.js
+FROM node:24.12-alpine
 
+# set working directory
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci
+COPY package.json ./
 
 # Copy source code
 COPY . .
 
+# Install dependencies
+RUN npm ci
+
+
+RUN npm run build
+
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["node", "dist/server.js"]
