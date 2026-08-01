@@ -18,7 +18,10 @@ class AuthController {
 
     const { email, password } = authSchema.parse(request.body);
 
-    const user = await this.userRepository.findOneBy({ email });
+    const user = await this.userRepository.findOne({
+      where: { email },
+      relations: ['company']
+    });
 
     if (!user) throw new AppError('Email ou senha Inválidos', 401);
 
@@ -33,9 +36,12 @@ class AuthController {
     );
 
     const accessToken = jwt.sign(
-      { id: user.id, email: user.email },
+      {
+        id: user.id,
+        companyId: user.company.id
+      },
       process.env.SECRET_KEY!,
-      { expiresIn: '1h' }
+      { expiresIn: '2h' }
     );
 
     response.cookie('refreshToken', refreshToken, {

@@ -2,24 +2,21 @@ import type { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import AppError from '../utils/error';
 
-export const authMiddleware: RequestHandler = (request, response, next) => {
+export const authMiddleware: RequestHandler = (request, _, next) => {
   const { authorization } = request.headers;
 
-  if (!authorization) {
-    response.status(403).send({ message: 'usuário não autorizado' });
-    return;
-  }
+  if (!authorization) throw new AppError('usuário não autorizado', 401);
+
   const [, token] = authorization.split(' ');
 
-  if (!token) {
-    response.status(403).send({ message: 'usuário não autorizado' });
-    return;
-  }
+  if (!token) throw new AppError('usuário não autorizado', 401);
 
   try {
-    const isValid = jwt.verify(token, process.env.SECRET_KEY!);
-    if (isValid) next();
-  } catch (error: any) {
-    throw new AppError('Invalid token', 401);
+    const payload = jwt.verify(token, process.env.SECRET_KEY!);
+    request.user = payload as { id: string; companyId: string };
+
+    next();
+  } catch (error) {
+    throw new AppError('token inválido', 401);
   }
 };

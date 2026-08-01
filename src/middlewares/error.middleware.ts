@@ -1,12 +1,13 @@
 import type { ErrorRequestHandler } from 'express';
 import { z, ZodError } from 'zod';
+
 import AppError from '../utils/error';
 
 export const errorMiddleware: ErrorRequestHandler = (
   error,
-  request,
+  _,
   response,
-  next
+  _next
 ) => {
   if (error instanceof ZodError) {
     return response.status(400).json({
