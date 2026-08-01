@@ -8,7 +8,7 @@ import { authRouter } from './routes/auth';
 import { modelRouter } from './routes/model';
 import { productRouter } from './routes/products';
 import { companyRouter } from './routes/companies';
-import { categoryRouter } from './routes/categories.route';
+import { categoriesRouter } from './routes/categories.route';
 import { userRouter } from './routes/user.route';
 
 import { errorMiddleware } from './middlewares/error.middleware';
@@ -28,7 +28,7 @@ app.use(express.json());
 app.use('/auth', authRouter);
 app.use(authMiddleware);
 app.use('/products', productRouter);
-app.use('/categories', categoryRouter);
+app.use('/categories', categoriesRouter);
 app.use('/companies', companyRouter);
 app.use('/user', userRouter);
 

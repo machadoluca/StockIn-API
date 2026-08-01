@@ -2,15 +2,15 @@ import { Router } from 'express';
 import DataSource from '../database/connection';
 
 import Category from '../entities/category';
-import CategoryController from '../controllers/categories.controller';
+import CategoryController from '../controllers/category.controller';
 
-const categoryRouter = Router();
+const categoriesRouter = Router();
 const categoryController = new CategoryController(
   DataSource.getRepository(Category)
 );
 
-categoryRouter.get('/', categoryController.getCategories);
-categoryRouter.get('/:categoryId', categoryController.getCategory);
-categoryRouter.post('/', categoryController.create);
+categoriesRouter.get('/', categoryController.getCategories);
+categoriesRouter.get('/:categoryId', categoryController.getCategory);
+categoriesRouter.post('/', categoryController.create);
 
-export { categoryRouter };
+export { categoriesRouter };
