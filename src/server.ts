@@ -5,7 +5,6 @@ import cors from 'cors';
 import DataSource from './database/connection';
 
 import { authRouter } from './routes/auth';
-import { modelRouter } from './routes/model';
 import { productRouter } from './routes/products';
 import { companyRouter } from './routes/companies';
 import { categoriesRouter } from './routes/categories.route';
@@ -31,10 +30,6 @@ app.use('/products', productRouter);
 app.use('/categories', categoriesRouter);
 app.use('/companies', companyRouter);
 app.use('/user', userRouter);
-
-if (process.env.NODE_ENV !== 'development') {
-  app.use('/model', modelRouter);
-}
 
 app.use(errorMiddleware);
 
