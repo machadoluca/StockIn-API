@@ -13,13 +13,13 @@ import Report from '../entities/report';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: 'localhost',
+  host: process.env.DATABASE_HOST,
   port: 5432,
   username: 'postgres',
-  password: process.env.DATABASE_PASSWORD!,
-  database: process.env.DATABASE_NAME!,
-  synchronize: false,
-  logging: false,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  synchronize: process.env.NODE_ENV === 'development' ? true : false,
+  logging: process.env.NODE_ENV === 'development' ? true : false,
   entities: [
     Category,
     Company,
@@ -31,20 +31,6 @@ export const AppDataSource = new DataSource({
     Prompt,
     Report
   ],
-  migrations: ['dist/database/migration/*.js'],
-  subscribers: []
-});
-
-export const AppDevDataSource = new DataSource({
-  type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: 'postgres',
-  password: process.env.DATABASE_PASSWORD!,
-  database: process.env.DATABASE_NAME!,
-  synchronize: true,
-  logging: false,
-  entities: ['src/entities/**/*.ts'],
-  migrations: ['src/database/migration/*.ts'],
+  migrations: ['database/migration/*.ts'],
   subscribers: []
 });

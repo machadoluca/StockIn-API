@@ -3,7 +3,7 @@ import type { Repository } from 'typeorm';
 import type ForecastService from '../services/forecast.service';
 import z from 'zod';
 
-import DataSource from '../database/connection';
+import dataSource from '../database/connection';
 import Category from '../entities/category';
 import ForecastRun from '../entities/forecastRun';
 import Forecast from '../entities/forecast';

@@ -5,10 +5,11 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node --env-file=.env.production dist/server.js",
-    "dev": "tsx watch --env-file=.env.development src/server",
     "build": "node esbuild.mjs",
-    "load-dataset": "tsx --env-file=.env.development scripts/load-dataset"
+    "start": "node --env-file=.env dist/server.js",
+    "dev": "tsx watch src/server",
+    "dev:local": "tsx watch --env-file=.env src/server",
+    "load-dataset": "tsx --env-file=.env scripts/load-dataset"
   },
   "keywords": [],
   "author": "",

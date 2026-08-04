@@ -7,5 +7,4 @@ temp/
 
 #env files
 .env
-.env.development
-.env.production
+.env.*

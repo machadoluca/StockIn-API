@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 
-import DataSource from './database/connection';
+import dataSource from './database/connection';
 
 import { authRouter } from './routes/auth';
 import { productRouter } from './routes/products';
@@ -33,7 +33,7 @@ app.use('/user', userRouter);
 
 app.use(errorMiddleware);
 
-DataSource.initialize()
+dataSource.initialize()
   .then(() => {
     console.log('Database connected');
     app.listen(process.env.PORT, () =>

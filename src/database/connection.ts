@@ -1,6 +1,5 @@
-import { AppDataSource, AppDevDataSource } from './data-source';
+import { AppDataSource } from './data-source';
 
-const DataSource =
-  process.env.NODE_ENV === 'production' ? AppDataSource : AppDevDataSource;
+const dataSource = AppDataSource;
 
-export default DataSource;
+export default dataSource;

@@ -1,21 +1,19 @@
-# Base Node.js
-FROM node:24.12-alpine
+FROM node:24.12-alpine AS base
 
-# set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
+COPY package*.json ./
 
-# Copy source code
 COPY . .
 
-# Install dependencies
 RUN npm ci
-
-
-RUN npm run build
 
 EXPOSE 3000
 
-CMD ["node", "dist/server.js"]
+FROM base AS development
+
+CMD ["npm", "run", "dev"]
+
+FROM base AS build
+
+RUN npm run build

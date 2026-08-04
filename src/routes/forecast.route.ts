@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { forecastHttpConfig } from '../config/http';
 
-import DataSource from '../database/connection';
+import dataSource from '../database/connection';
 import Category from '../entities/category';
 import ForecastService from '../services/forecast.service';
 import ForecastController from '../controllers/forecast.controller';
@@ -12,7 +12,7 @@ const forecastController = new ForecastController({
     forecastService: new ForecastService(forecastHttpConfig)
   },
   repositories: {
-    categoriesRepository: DataSource.getRepository(Category)
+    categoriesRepository: dataSource.getRepository(Category)
   }
 });
 

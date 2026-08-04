@@ -2,7 +2,7 @@ import type { RequestHandler } from 'express';
 import { Between, In, type Repository } from 'typeorm';
 import z from 'zod';
 import Company from '../entities/company';
-import DataSource from '../database/connection';
+import dataSource from '../database/connection';
 import Category from '../entities/category';
 import Product from '../entities/product';
 import { pagination } from '../utils/pagination';
@@ -14,7 +14,7 @@ class CompanyController {
 
   constructor(companyRepository?: Repository<Company>) {
     this.companyRepository =
-      companyRepository ?? DataSource.getRepository(Company);
+      companyRepository ?? dataSource.getRepository(Company);
   }
 
   public getSummary: RequestHandler = async (request, response) => {
@@ -35,7 +35,7 @@ class CompanyController {
       const previousEndDate = new Date('2022-05-31');
       const previousStartDate = new Date('2022-05-01');
 
-      const salesRepository = DataSource.getRepository(Sale);
+      const salesRepository = dataSource.getRepository(Sale);
 
       const currentSalesResult = await salesRepository
         .createQueryBuilder('sale')
@@ -146,7 +146,7 @@ class CompanyController {
   public getCategories: RequestHandler = async (request, response) => {
     const { companyId } = request.params;
 
-    const categories = await DataSource.getRepository(Category).find({
+    const categories = await dataSource.getRepository(Category).find({
       where: {
         company: {
           id: companyId
@@ -163,7 +163,7 @@ class CompanyController {
 
     const skip = pagination(Number(page), Number(limit));
 
-    const products = await DataSource.getRepository(Product).find({
+    const products = await dataSource.getRepository(Product).find({
       where: {
         company: {
           id: companyId
@@ -189,16 +189,16 @@ class CompanyController {
         return response.json(400).json({ message: 'company not found' });
       }
 
-      const lastForecastData = await DataSource.getRepository(
-        ForecastRun
-      ).findOne({
-        where: {
-          company
-        },
-        order: {
-          createdAt: 'DESC'
-        }
-      });
+      const lastForecastData = await dataSource
+        .getRepository(ForecastRun)
+        .findOne({
+          where: {
+            company
+          },
+          order: {
+            createdAt: 'DESC'
+          }
+        });
 
       return response.status(200).json(lastForecastData);
     } catch (error) {

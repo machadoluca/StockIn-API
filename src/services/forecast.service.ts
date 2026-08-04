@@ -1,7 +1,7 @@
 import type { AxiosInstance } from 'axios';
 import type Category from '../entities/category';
 
-import DataSource from '../database/connection';
+import dataSource from '../database/connection';
 
 class ForecastService {
   constructor(private readonly httpClient: AxiosInstance) {}
@@ -13,7 +13,7 @@ class ForecastService {
       category: string;
       day: Date;
       total_quantity: string;
-    }[] = await DataSource.query(
+    }[] = await dataSource.query(
       `
         SELECT
             c.name AS category,

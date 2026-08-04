@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
 import { Like, Raw, Repository } from 'typeorm';
-import DataSource from '../database/connection';
+import dataSource from '../database/connection';
 import Product from '../entities/product';
 import z from 'zod';
 import Category from '../entities/category';
@@ -9,7 +9,7 @@ class ProductController {
   productRepository: Repository<Product>;
 
   constructor() {
-    this.productRepository = DataSource.getRepository(Product);
+    this.productRepository = dataSource.getRepository(Product);
   }
 
   public getProducts: RequestHandler = async (request, response) => {
@@ -33,7 +33,7 @@ class ProductController {
     try {
       productSchema.parse(request.body);
 
-      const category = await DataSource.getRepository(Category).findOneBy({
+      const category = await dataSource.getRepository(Category).findOneBy({
         id: categoryId
       });
 

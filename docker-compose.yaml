@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      target: development
+    ports:
+      - '${PORT}:3000'
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      RONTEND_URL: ${FRONTEND_URL}
+      PORT: '${PORT}'
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY}
+      REFRESH_KEY: ${REFRESH_KEY}
+      FORECAST_SERVICE_URL: ${FORECAST_SERVICE_URL}
+      CHOKIDAR_USEPOLLING: 'true'
+      WATCHPACK_POLLING: 'true'
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+    #   - flask-api
+
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - '5432:5432'
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # flask-api:
+  #   build: ./ml-service
+  #   ports:
+  #     - '5000:5000'
+  #   environment:
+  #     - FLASK_ENV=development
+  #   volumes:
+  #     - ./ml-service:/app
