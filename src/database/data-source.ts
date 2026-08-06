@@ -11,8 +11,6 @@ import { DataSource } from 'typeorm';
 // import Prompt from '../entities/prompt';
 // import Report from '../entities/report';
 
-const isDevelopment = process.env.NODE_ENV === 'development';
-
 export const AppDataSource = new DataSource({
   type: 'postgres',
   host: process.env.DATABASE_HOST,
@@ -20,8 +18,8 @@ export const AppDataSource = new DataSource({
   username: 'postgres',
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  synchronize: isDevelopment,
-  logging: isDevelopment,
+  synchronize: process.env.NODE_ENV === 'development',
+  logging: false,
   entities: ['src/entities/*.ts'],
   migrations: ['database/migration/*.ts'],
   subscribers: []
