@@ -25,15 +25,16 @@ app.use(express.json());
 
 // Routes
 app.use('/auth', authRouter);
+app.use('/user', userRouter);
 app.use(authMiddleware);
 app.use('/products', productRouter);
 app.use('/categories', categoriesRouter);
 app.use('/companies', companyRouter);
-app.use('/user', userRouter);
 
 app.use(errorMiddleware);
 
-dataSource.initialize()
+dataSource
+  .initialize()
   .then(() => {
     console.log('Database connected');
     app.listen(process.env.PORT, () =>

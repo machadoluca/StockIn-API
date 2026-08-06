@@ -23,7 +23,7 @@ class AuthController {
       relations: ['company']
     });
 
-    if (!user) throw new AppError('Email ou senha Inválidos', 401);
+    if (!user) throw new AppError('Usuário não encontrado', 401);
 
     const checkPassword = await bcrypt.compare(password, user.password);
 
