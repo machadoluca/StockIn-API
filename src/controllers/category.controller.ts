@@ -59,7 +59,8 @@ class CategoryController {
     const { categoryId } = request.params;
 
     const category = await this.categoryRepository.findOneBy({
-      id: categoryId
+      id: categoryId,
+      company: { id: request.user.companyId }
     });
 
     if (!category) throw new AppError('Category not found', 404);

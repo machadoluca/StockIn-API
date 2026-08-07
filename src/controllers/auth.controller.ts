@@ -10,7 +10,7 @@ import AppError from '../utils/error';
 class AuthController {
   constructor(private readonly userRepository: Repository<User>) {}
 
-  public login = async (request: Request, response: Response) => {
+  login = async (request: Request, response: Response) => {
     const authSchema = z.object({
       email: z.email(),
       password: z.string()
@@ -62,7 +62,7 @@ class AuthController {
     });
   };
 
-  public refresh = async (request: Request, response: Response) => {};
+  refresh = async (request: Request, response: Response) => {};
 }
 
 export default AuthController;

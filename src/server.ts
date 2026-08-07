@@ -4,7 +4,7 @@ import cors from 'cors';
 
 import dataSource from './database/connection';
 
-import { authRouter } from './routes/auth';
+import { authRouter } from './routes/auth.route';
 import { productRouter } from './routes/products';
 import { companyRouter } from './routes/companies';
 import { categoriesRouter } from './routes/categories.route';
