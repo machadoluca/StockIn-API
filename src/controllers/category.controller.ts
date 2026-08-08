@@ -31,24 +31,14 @@ class CategoryController {
     });
 
     const { companyId } = request.user;
-    const { limit, random } = categoriesSchema.parse(request.query);
+    const { limit } = categoriesSchema.parse(request.query);
 
-    let categories: Category[] = [];
-    if (random) {
-      categories = await this.categoryRepository
-        .createQueryBuilder('category')
-        .where('category.company_id = :companyId', { companyId })
-        .orderBy('RANDOM()')
-        .take(limit)
-        .getMany();
-    } else {
-      categories = await this.categoryRepository.find({
-        where: {
-          company: { id: companyId }
-        },
-        take: limit
-      });
-    }
+    const categories = await this.categoryRepository
+      .createQueryBuilder('category')
+      .where('category.company_id = :companyId', { companyId })
+      .orderBy('RANDOM()')
+      .take(limit)
+      .getMany();
 
     if (!categories.length) throw new AppError('Categories not found', 404);
 
