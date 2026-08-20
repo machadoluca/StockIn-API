@@ -9,6 +9,7 @@ import { productRouter } from './routes/products';
 import { companyRouter } from './routes/companies';
 import { categoriesRouter } from './routes/categories.route';
 import { userRouter } from './routes/user.route';
+import { forecastRouter } from './routes/forecast.route';
 
 import { errorMiddleware } from './middlewares/error.middleware';
 import { authMiddleware } from './middlewares/auth.middleware';
@@ -30,6 +31,7 @@ app.use(authMiddleware);
 app.use('/products', productRouter);
 app.use('/categories', categoriesRouter);
 app.use('/companies', companyRouter);
+app.use('/forecasts', forecastRouter);
 
 app.use(errorMiddleware);
 

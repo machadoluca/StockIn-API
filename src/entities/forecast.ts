@@ -5,16 +5,16 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import ForecastRun from './forecastRun';
+import ForecastJob from './forecast-jobs';
 
 @Entity('forecasts')
 class Forecast {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => ForecastRun, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ForecastJob, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'forecast_run_id' })
-  run: ForecastRun;
+  run: ForecastJob;
 
   @Column({ type: 'date' })
   date: Date;

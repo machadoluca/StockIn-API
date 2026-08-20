@@ -1,12 +1,12 @@
 import type { RequestHandler } from 'express';
-import { Between, In, type Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import z from 'zod';
 import Company from '../entities/company';
 import dataSource from '../database/connection';
 import Category from '../entities/category';
 import Product from '../entities/product';
 import { pagination } from '../utils/pagination';
-import ForecastRun from '../entities/forecastRun';
+import ForecastJob from '../entities/forecast-jobs';
 import Sale from '../entities/sale';
 
 class CompanyController {
@@ -190,7 +190,7 @@ class CompanyController {
       }
 
       const lastForecastData = await dataSource
-        .getRepository(ForecastRun)
+        .getRepository(ForecastJob)
         .findOne({
           where: {
             company

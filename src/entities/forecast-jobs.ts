@@ -2,25 +2,49 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn
 } from 'typeorm';
+import { ForecastJobStatus } from '../types/forecast-job-status';
+
 import Category from './category';
 import Forecast from './forecast';
 import Company from './company';
 
-@Entity('forecast_runs')
-class ForecastRun {
-  @PrimaryGeneratedColumn('increment')
+@Entity('forecast_jobs')
+class ForecastJob {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'jsonb', nullable: true })
   metrics: any;
 
+  @Index()
+  @Column({
+    type: 'enum',
+    enum: ForecastJobStatus,
+    default: ForecastJobStatus.PENDING
+  })
+  status: ForecastJobStatus;
+
   @CreateDateColumn({ type: 'timestamp with time zone', name: 'created_at' })
   createdAt: Date;
+
+  @Column({
+    type: 'timestamp with time zone',
+    name: 'finished_at',
+    default: null
+  })
+  finishedAt: Date;
+
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+    name: 'reference_timestamp'
+  })
+  referrenceTimestamp: Date;
 
   @ManyToOne(() => Category)
   @JoinColumn({ name: 'category_id' })
@@ -34,4 +58,4 @@ class ForecastRun {
   forecastData: Forecast[];
 }
 
-export default ForecastRun;
+export default ForecastJob;

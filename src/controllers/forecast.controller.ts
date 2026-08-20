@@ -1,23 +1,24 @@
 import type { Request, Response } from 'express';
-import type { Repository } from 'typeorm';
-import type ForecastService from '../services/forecast.service';
+import { Repository } from 'typeorm';
+import ForecastJob from '../entities/forecast-jobs';
+import ForecastService from '../services/forecast.service';
+import { ForecastJobStatus } from '../types/forecast-job-status';
 import z from 'zod';
-
-import dataSource from '../database/connection';
 import Category from '../entities/category';
-import ForecastRun from '../entities/forecastRun';
-import Forecast from '../entities/forecast';
 // import Company from '../entities/company';
 // import openaiService from '../services/openai.service';
 // import pdfService from '../services/pdf.service';
+import DatabaseNotificationService from '../services/db-notification.service';
 import AppError from '../utils/error';
 
 interface ForecastControllerDependencies {
   services: {
     forecastService: ForecastService;
+    databaseNotificationService: DatabaseNotificationService;
   };
   repositories: {
     categoriesRepository: Repository<Category>;
+    forecastJobsRepository: Repository<ForecastJob>;
   };
 }
 
@@ -239,6 +240,43 @@ class ForecastController {
   //     });
   //   }
   // };
+
+  create = async (_: Request, response: Response) => {
+    const categories = await this.deps.repositories.categoriesRepository.find({
+      relations: ['company']
+    });
+
+    const jobs = categories.map(category => {
+      return this.deps.repositories.forecastJobsRepository.create({
+        category,
+        status: ForecastJobStatus.PENDING,
+        company: { id: category.companyId }
+      });
+    });
+
+    await this.deps.repositories.forecastJobsRepository.save(jobs);
+
+    this.deps.services.databaseNotificationService.notify(
+      'forecast_jobs',
+      'New forecast jobs created'
+    );
+
+    response.status(204).send();
+  };
+
+  notify = async (request: Request, response: Response) => {
+    const notifySchema = z.object({
+      message: z.string().optional()
+    });
+
+    const { message } = notifySchema.parse(request.body);
+
+    const notifyService = new DatabaseNotificationService();
+
+    await notifyService.notify('forecast_jobs', message);
+
+    return response.sendStatus(204);
+  };
 }
 
 export default ForecastController;

@@ -8,6 +8,7 @@
     "build": "node esbuild.mjs",
     "start": "node --env-file=.env dist/server.js",
     "dev": "tsx watch --env-file=.env src/server",
+    "dev:worker": "tsx watch --env-file=.env src/worker",
     "load-dataset": "tsx --env-file=.env scripts/load-dataset"
   },
   "keywords": [],
@@ -34,6 +35,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.10.1",
     "@types/pdfkit": "^0.17.4",
+    "@types/pg": "^8.23.1",
     "esbuild": "^0.28.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",

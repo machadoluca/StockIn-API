@@ -4,7 +4,8 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  RelationId
 } from 'typeorm';
 
 import Product from './product';
@@ -30,6 +31,9 @@ class Category {
   @ManyToOne(() => Company)
   @JoinColumn({ name: 'company_id' })
   company: Company;
+
+  @RelationId((category: Category) => category.company)
+  companyId: string;
 }
 
 export default Category;
