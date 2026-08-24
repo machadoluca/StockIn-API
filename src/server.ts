@@ -27,11 +27,15 @@ app.use(express.json());
 // Routes
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
-// app.use(authMiddleware);
+
+// development routes
+app.use('/forecasts', forecastRouter);
+
+// Protected routes
+app.use(authMiddleware);
 app.use('/products', productRouter);
 app.use('/categories', categoriesRouter);
 app.use('/companies', companyRouter);
-app.use('/forecasts', forecastRouter);
 
 app.use(errorMiddleware);
 

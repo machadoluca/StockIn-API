@@ -31,14 +31,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
-  # flask-api:
-  #   build: ./ml-service
-  #   ports:
-  #     - '5000:5000'
-  #   environment:
-  #     - FLASK_ENV=development
-  #   volumes:
-  #     - ./ml-service:/app
+  flask-api:
+    build: ../stockIn-service-API/
+    ports:
+      - '8000:8000'
 
 volumes:
   postgres_data:
