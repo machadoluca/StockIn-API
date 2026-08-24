@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { forecastHttpConfig } from '../config/http';
+import { forecastHttpClient } from '../config/http';
 import dataSource from '../database/connection';
 import ForecastController from '../controllers/forecast.controller';
 import Category from '../entities/category';
@@ -10,7 +10,6 @@ import DatabaseNotificationService from '../services/db-notification.service';
 const forecastRouter = Router();
 const forecastController = new ForecastController({
   services: {
-    forecastService: new ForecastService(forecastHttpConfig),
     databaseNotificationService: new DatabaseNotificationService()
   },
   repositories: {
@@ -19,7 +18,6 @@ const forecastController = new ForecastController({
   }
 });
 
-forecastRouter.get('/categories', forecastController.runCategoriesForecast);
 forecastRouter.post('/notify', forecastController.notify);
 forecastRouter.post('/jobs', forecastController.create);
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
 
-export const forecastHttpConfig = axios.create({
+export const forecastHttpClient = axios.create({
   baseURL: process.env.FORECAST_SERVICE_URL
 });

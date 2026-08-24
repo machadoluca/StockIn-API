@@ -6,12 +6,13 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  RelationId
 } from 'typeorm';
 import { ForecastJobStatus } from '../types/forecast-job-status';
 
 import Category from './category';
-import Forecast from './forecast';
+import ForecastData from './forecast-data';
 import Company from './company';
 
 @Entity('forecast_jobs')
@@ -54,8 +55,14 @@ class ForecastJob {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
-  @OneToMany(() => Forecast, forecast => forecast.run)
-  forecastData: Forecast[];
+  @OneToMany(() => ForecastData, forecast => forecast.run)
+  forecastData: ForecastData[];
+
+  @RelationId((forecastJob: ForecastJob) => forecastJob.category)
+  categoryId: string;
+
+  @RelationId((forecastJob: ForecastJob) => forecastJob.company)
+  companyId: string;
 }
 
 export default ForecastJob;

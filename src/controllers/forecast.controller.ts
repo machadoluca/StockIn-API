@@ -1,19 +1,20 @@
 import type { Request, Response } from 'express';
 import { Repository } from 'typeorm';
+import z from 'zod';
+
+import { ForecastJobStatus } from '../types/forecast-job-status';
+import AppError from '../utils/error';
+
 import ForecastJob from '../entities/forecast-jobs';
 import ForecastService from '../services/forecast.service';
-import { ForecastJobStatus } from '../types/forecast-job-status';
-import z from 'zod';
 import Category from '../entities/category';
 // import Company from '../entities/company';
 // import openaiService from '../services/openai.service';
 // import pdfService from '../services/pdf.service';
 import DatabaseNotificationService from '../services/db-notification.service';
-import AppError from '../utils/error';
 
 interface ForecastControllerDependencies {
   services: {
-    forecastService: ForecastService;
     databaseNotificationService: DatabaseNotificationService;
   };
   repositories: {
@@ -25,83 +26,43 @@ interface ForecastControllerDependencies {
 class ForecastController {
   constructor(private readonly deps: ForecastControllerDependencies) {}
 
-  runCategoriesForecast = async (request: Request, response: Response) => {
-    const forecastCategorySchema = z.object({
-      categoryId: z.string()
-    });
-
-    const { categoryId } = forecastCategorySchema.parse(request.body);
-
-    const category =
-      await this.deps.repositories.categoriesRepository.findOneBy({
-        id: categoryId
-      });
-
-    if (!category) throw new AppError('Category not found', 404);
-
-    const forecastModelResponse =
-      await this.deps.services.forecastService.forecastCategory(categoryId);
-
-    return response.json({ message: forecastModelResponse.data });
-
-    // const data = await modelResponse.json();
-
-    // const forecastRun = await DataSource.getRepository(ForecastRun).save({
-    //   category,
-    //   metrics: data.metrics
-    // });
-
-    // const formattedForecasts = data.forecast.map(
-    //   (forecast: {
-    //     ds: string;
-    //     yhat: number;
-    //     yhat_lower: number;
-    //     yhat_upper: number;
-    //   }) => {
-    //     return {
-    //       run: forecastRun.id,
-    //       date: new Date(forecast.ds).toISOString(),
-    //       predicted: forecast.yhat,
-    //       predictedLower: forecast.yhat_lower,
-    //       predictedUpper: forecast.yhat_upper
-    //     };
-    //   }
-    // );
-
-    // const savedForecasts =
-    //   await DataSource.getRepository(Forecast).save(formattedForecasts);
-
-    // return response.status(200).json(formatData);
-  };
-
-  // FEAT: implement product forecast logic
-  // public predictProduct: RequestHandler = async (request, response) => {
-  //   const queryData: {
-  //     category: string;
-  //     day: Date;
-  //     total_quantity: string;
-  //   }[] = await DataSource.query(
-  //     `
-  //       SELECT
-  //       c.name AS category,
-  //       date(s.created_at) AS day,
-  //       p.sku,
-  //       SUM(s.quantity) AS total_quantity
-  //       FROM sales s
-  //       JOIN products p ON p.id = s.product_id
-  //       JOIN categories c ON c.id = p.category_id
-  //       WHERE c.id = $1
-  //         AND s.status IN (
-  //             'Shipped',
-  //             'Shipped - delivered to buyer',
-  //             'shipped - picked up'
-  //         )
-  //       GROUP BY c.name, p.sku, date(s.created_at)
-  //       ORDER BY day;
-  //     `
+  // runCategoriesForecast = async (request: Request, response: Response) => {
+  //   const forecastCategorySchema = z.object({
+  //     categoryId: z.string()
+  //   });
+  //   const { categoryId } = forecastCategorySchema.parse(request.body);
+  //   const category =
+  //     await this.deps.repositories.categoriesRepository.findOneBy({
+  //       id: categoryId
+  //     });
+  //   if (!category) throw new AppError('Category not found', 404);
+  //   const forecastModelResponse =
+  //     await this.deps.services.forecastService.forecastCategory(categoryId);
+  //   return response.json({ message: forecastModelResponse.data });
+  //   const data = await modelResponse.json();
+  //   const forecastRun = await DataSource.getRepository(ForecastRun).save({
+  //     category,
+  //     metrics: data.metrics
+  //   });
+  //   const formattedForecasts = data.forecast.map(
+  //     (forecast: {
+  //       ds: string;
+  //       yhat: number;
+  //       yhat_lower: number;
+  //       yhat_upper: number;
+  //     }) => {
+  //       return {
+  //         run: forecastRun.id,
+  //         date: new Date(forecast.ds).toISOString(),
+  //         predicted: forecast.yhat,
+  //         predictedLower: forecast.yhat_lower,
+  //         predictedUpper: forecast.yhat_upper
+  //       };
+  //     }
   //   );
-
-  //   return response.status(200).json(queryData);
+  //   const savedForecasts =
+  //     await DataSource.getRepository(Forecast).save(formattedForecasts);
+  //   return response.status(200).json(formatData);
   // };
 
   // public generateAnalysisReport: RequestHandler = async (request, response) => {
@@ -242,9 +203,7 @@ class ForecastController {
   // };
 
   create = async (_: Request, response: Response) => {
-    const categories = await this.deps.repositories.categoriesRepository.find({
-      relations: ['company']
-    });
+    const categories = await this.deps.repositories.categoriesRepository.find();
 
     const jobs = categories.map(category => {
       return this.deps.repositories.forecastJobsRepository.create({
@@ -271,9 +230,10 @@ class ForecastController {
 
     const { message } = notifySchema.parse(request.body);
 
-    const notifyService = new DatabaseNotificationService();
-
-    await notifyService.notify('forecast_jobs', message);
+    await this.deps.services.databaseNotificationService.notify(
+      'forecast_jobs',
+      message
+    );
 
     return response.sendStatus(204);
   };

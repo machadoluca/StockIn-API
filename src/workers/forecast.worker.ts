@@ -1,13 +1,16 @@
 import { DataSource } from 'typeorm';
 import { ForecastJobStatus } from '../types/forecast-job-status';
+import ForecastJob from '../entities/forecast-jobs';
 import DatabaseNotificationService from '../services/db-notification.service';
+import type ForecastService from '../services/forecast.service';
 
 class ForecastWorker {
   private running = false;
 
   constructor(
     private readonly dataSource: DataSource,
-    private readonly notificationService: DatabaseNotificationService
+    private readonly notificationService: DatabaseNotificationService,
+    private readonly forecastService: ForecastService
   ) {}
 
   async start() {
@@ -28,7 +31,7 @@ class ForecastWorker {
   async processPendingJobs() {
     while (this.running) {
       const processingJob = await this.dataSource.transaction(async manager => {
-        const forecastJobsRepository = manager.getRepository('ForecastJob');
+        const forecastJobsRepository = manager.getRepository(ForecastJob);
 
         const pendingJob = await forecastJobsRepository
           .createQueryBuilder('job')
@@ -41,7 +44,7 @@ class ForecastWorker {
         if (!pendingJob) return null;
 
         await forecastJobsRepository.update(
-          { id: pendingJob?.id },
+          { id: pendingJob.id },
           { status: ForecastJobStatus.IN_PROGRESS }
         );
 
@@ -50,17 +53,36 @@ class ForecastWorker {
 
       if (!processingJob) break;
 
-      //FEAT: Chamar serviço de previsão
       console.log('Processing job:', processingJob.id);
-      await this.dataSource.transaction(async manager => {
-        const forecastJobsRepository = manager.getRepository('ForecastJob');
-
-        await forecastJobsRepository.update(
-          { id: processingJob.id },
-          { status: ForecastJobStatus.COMPLETED, finishedAt: new Date() }
-        );
-      });
+      await this.runForecast(processingJob);
     }
+  }
+
+  async runForecast(job: ForecastJob) {
+    const forecastData = await this.dataSource.query(
+      `
+        SELECT
+            date(s.created_at) AS ds,
+            SUM(s.quantity) AS y
+        FROM sales s
+        JOIN products p ON p.id = s.product_id
+        WHERE p.category_id = $1
+        AND s.status IN (
+          'Shipped',
+          'Shipping',
+          'Shipped - Picked Up',
+          'Shipped - Out for Delivery',
+          'Shipped - Delivered to Buyer',
+          'Pending - Waiting for Pick Up'
+        )
+        GROUP BY date(s.created_at)
+        ORDER BY ds;
+      `,
+      [job.categoryId]
+    );
+
+    const response = await this.forecastService.forecast(forecastData);
+    console.log('Forecast response:', response);
   }
 }
 

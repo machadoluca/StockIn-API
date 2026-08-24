@@ -7,8 +7,8 @@ import {
 } from 'typeorm';
 import ForecastJob from './forecast-jobs';
 
-@Entity('forecasts')
-class Forecast {
+@Entity('forecasts_data')
+class ForecastData {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -29,4 +29,4 @@ class Forecast {
   predictedUpper: number;
 }
 
-export default Forecast;
+export default ForecastData;
