@@ -3,15 +3,14 @@ import { Repository } from 'typeorm';
 import z from 'zod';
 
 import { ForecastJobStatus } from '../types/forecast-job-status';
-import AppError from '../utils/error';
 
 import ForecastJob from '../entities/forecast-jobs';
-import ForecastService from '../services/forecast.service';
 import Category from '../entities/category';
 // import Company from '../entities/company';
 // import openaiService from '../services/openai.service';
 // import pdfService from '../services/pdf.service';
 import DatabaseNotificationService from '../services/db-notification.service';
+import AppError from '../utils/error';
 
 interface ForecastControllerDependencies {
   services: {
@@ -221,6 +220,37 @@ class ForecastController {
     );
 
     response.status(204).send();
+  };
+
+  createOne = async (request: Request, response: Response) => {
+    const createJobSchema = z.object({
+      categoryId: z.string()
+    });
+
+    const { categoryId } = createJobSchema.parse(request.body);
+
+    const category = await this.deps.repositories.categoriesRepository.findOne({
+      where: { id: categoryId }
+    });
+
+    if (!category) return new AppError('Category not found', 404);
+
+    const job = this.deps.repositories.forecastJobsRepository.create({
+      category,
+      status: ForecastJobStatus.PENDING,
+      company: { id: category.companyId }
+    });
+
+    await this.deps.repositories.forecastJobsRepository.save(job);
+
+    this.deps.services.databaseNotificationService.notify(
+      'forecast_jobs',
+      'New forecast jobs created'
+    );
+
+    response
+      .status(204)
+      .send({ message: 'Forecast job created successfully', jobId: job.id });
   };
 
   notify = async (request: Request, response: Response) => {

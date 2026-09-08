@@ -24,5 +24,6 @@ forecastRouter.get('/ping', async (_, res) => {
 });
 forecastRouter.post('/notify', forecastController.notify);
 forecastRouter.post('/jobs', forecastController.create);
+forecastRouter.post('/test', forecastController.createOne);
 
 export { forecastRouter };

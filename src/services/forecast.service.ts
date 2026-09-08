@@ -11,14 +11,14 @@ class ForecastService {
       };
     });
 
-    return formatData;
-    // FEAT: Chamar serviço de previsão
-    // const modelReponse = await this.httpClient.post('/', {
-    //   trainning_data: formatData,
-    //   initial: '45 days',
-    //   period: '7 days',
-    //   horizon_str: '7 days'
-    // });
+    const response = await this.httpClient.post('/forecast', {
+      trainning_data: formatData,
+      initial: '45 days',
+      period: '7 days',
+      horizon_str: '7 days'
+    });
+
+    return response;
   };
 }
 

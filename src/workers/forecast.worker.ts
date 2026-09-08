@@ -82,7 +82,16 @@ class ForecastWorker {
     );
 
     const response = await this.forecastService.forecast(forecastData);
-    console.log('Forecast response:', response);
+    console.log('Forecast response:', response.data);
+
+    await this.dataSource.getRepository(ForecastJob).update(
+      { id: job.id },
+      {
+        status: ForecastJobStatus.COMPLETED,
+        finishedAt: new Date(),
+        metrics: response.data.metrics
+      }
+    );
   }
 }
 
