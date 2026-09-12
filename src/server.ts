@@ -10,6 +10,7 @@ import { companyRouter } from './routes/companies';
 import { categoriesRouter } from './routes/categories.route';
 import { userRouter } from './routes/user.route';
 import { forecastRouter } from './routes/forecast.route';
+import { salesRouter } from './routes/sales.route';
 
 import { errorMiddleware } from './middlewares/error.middleware';
 import { authMiddleware } from './middlewares/auth.middleware';
@@ -28,11 +29,12 @@ app.use(express.json());
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 
-// development routes
+// unprotected development routes
 app.use('/forecasts', forecastRouter);
 
 // Protected routes
 app.use(authMiddleware);
+app.use('/sales', salesRouter);
 app.use('/products', productRouter);
 app.use('/categories', categoriesRouter);
 app.use('/companies', companyRouter);
