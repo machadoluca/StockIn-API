@@ -249,7 +249,7 @@ class ForecastController {
     );
 
     response
-      .status(204)
+      .status(200)
       .send({ message: 'Forecast job created successfully', jobId: job.id });
   };
 

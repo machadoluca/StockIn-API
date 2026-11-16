@@ -14,6 +14,7 @@ import { ForecastJobStatus } from '../types/forecast-job-status';
 import Category from './category';
 import ForecastData from './forecast-data';
 import Company from './company';
+import type { IForecastData } from '../services/forecast.service';
 
 @Entity('forecast_jobs')
 class ForecastJob {
@@ -21,7 +22,7 @@ class ForecastJob {
   id: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  metrics: any;
+  metrics: IForecastData['data']['metrics'];
 
   @Index()
   @Column({

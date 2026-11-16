@@ -3,6 +3,8 @@ import { ForecastJobStatus } from '../types/forecast-job-status';
 import ForecastJob from '../entities/forecast-jobs';
 import DatabaseNotificationService from '../services/db-notification.service';
 import type ForecastService from '../services/forecast.service';
+import ForecastData from '../entities/forecast-data';
+import type { IForecastData } from '../services/forecast.service';
 
 class ForecastWorker {
   private running = false;
@@ -82,7 +84,6 @@ class ForecastWorker {
     );
 
     const response = await this.forecastService.forecast(forecastData);
-    console.log('Forecast response:', response.data);
 
     await this.dataSource.getRepository(ForecastJob).update(
       { id: job.id },
@@ -92,6 +93,24 @@ class ForecastWorker {
         metrics: response.data.metrics
       }
     );
+
+    const savedForecasts: ForecastData[] = [];
+    response.data.forecast.map(forecast => {
+      const createdForecast = this.dataSource
+        .getRepository(ForecastData)
+        .create({
+          date: forecast.ds,
+          predicted: forecast.yhat,
+          predictedLower: forecast.yhat_lower,
+          predictedUpper: forecast.yhat_upper,
+          categoryId: job.categoryId,
+          run: job.id
+        });
+
+      savedForecasts.push(createdForecast);
+    });
+
+    await this.dataSource.getRepository(ForecastData).save(savedForecasts);
   }
 }
 
