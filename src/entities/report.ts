@@ -7,7 +7,6 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import Company from './company';
-import Prompt from './prompt';
 
 @Entity('reports')
 class Report {
@@ -29,10 +28,6 @@ class Report {
   @ManyToOne(() => Company, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'company_id' })
   company: Company;
-
-  @ManyToOne(() => Prompt, { eager: true })
-  @JoinColumn({ name: 'prompt_id' })
-  prompt: Prompt;
 }
 
 export default Report;
