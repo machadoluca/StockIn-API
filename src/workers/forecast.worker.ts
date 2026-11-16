@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 import { ForecastJobStatus } from '../types/forecast-job-status';
-import ForecastJob from '../entities/forecast-jobs';
+import ForecastJob from '../entities/forecast-job';
 import DatabaseNotificationService from '../services/db-notification.service';
 import type ForecastService from '../services/forecast.service';
 import ForecastData from '../entities/forecast-data';

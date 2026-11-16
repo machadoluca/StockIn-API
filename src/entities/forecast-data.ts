@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import ForecastJob from './forecast-jobs';
+import ForecastJob from './forecast-job';
 import Category from './category';
 
 @Entity('forecasts_data')

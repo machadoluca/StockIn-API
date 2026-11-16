@@ -4,7 +4,7 @@ import z from 'zod';
 
 import { ForecastJobStatus } from '../types/forecast-job-status';
 
-import ForecastJob from '../entities/forecast-jobs';
+import ForecastJob from '../entities/forecast-job';
 import Category from '../entities/category';
 // import Company from '../entities/company';
 // import openaiService from '../services/openai.service';

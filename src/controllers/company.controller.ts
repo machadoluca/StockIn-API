@@ -6,8 +6,8 @@ import dataSource from '../database/connection';
 import Category from '../entities/category';
 import Product from '../entities/product';
 import { pagination } from '../utils/pagination';
-import ForecastJob from '../entities/forecast-jobs';
-import Sale from '../entities/sale';
+import ForecastJob from '../entities/forecast-job';
+import Order from '../entities/order';
 
 class CompanyController {
   private companyRepository: Repository<Company>;
@@ -35,7 +35,7 @@ class CompanyController {
       const previousEndDate = new Date('2022-05-31');
       const previousStartDate = new Date('2022-05-01');
 
-      const salesRepository = dataSource.getRepository(Sale);
+      const salesRepository = dataSource.getRepository(Order);
 
       const currentSalesResult = await salesRepository
         .createQueryBuilder('sale')

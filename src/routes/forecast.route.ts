@@ -2,7 +2,7 @@ import { Router } from 'express';
 import dataSource from '../database/connection';
 import ForecastController from '../controllers/forecast.controller';
 import Category from '../entities/category';
-import ForecastJob from '../entities/forecast-jobs';
+import ForecastJob from '../entities/forecast-job';
 import DatabaseNotificationService from '../services/db-notification.service';
 import { forecastHttpClient } from '../config/http';
 

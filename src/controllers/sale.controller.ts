@@ -1,10 +1,10 @@
 import type { Request, Response } from 'express';
 import { Repository } from 'typeorm';
 import dayjs from 'dayjs';
-import Sale from '../entities/sale';
+import Order from '../entities/order';
 
 class SaleController {
-  constructor(private salesRepository: Repository<Sale>) {}
+  constructor(private salesRepository: Repository<Order>) {}
 
   getMonthlySales = async (request: Request, response: Response) => {
     const { companyId } = request.user;
